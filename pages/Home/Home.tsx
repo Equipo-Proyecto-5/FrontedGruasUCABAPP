@@ -1,51 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Animated } from 'react-native';
-import { Link } from 'expo-router';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import { useRouter } from 'expo-router';
 import logo from '../../assets/LogoUcab-removebg-preview.png';
 
 export default function HomeScreen() {
-  const [redirecting, setRedirecting] = useState(false);
-  const scale = new Animated.Value(0); // Valor inicial de la animación (escala 0)
-  const translateX = new Animated.Value(-500); // Comienza a la izquierda
+  const router = useRouter();
+  const translateX = new Animated.Value(-500); // Animación de la imagen (slide-in)
+  const fadeAnim = new Animated.Value(0); // Animación de opacidad del texto
+  const translateY = new Animated.Value(20); // Animación de movimiento del texto (slide-up)
 
   useEffect(() => {
+    // Iniciar animaciones
+    Animated.parallel([
+      // Animación de deslizamiento de la imagen
+      Animated.timing(translateX, {
+        toValue: 0, // Mover a la posición final
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+      // Animación de las letras (fade-in y slide-up)
+      Animated.timing(fadeAnim, {
+        toValue: 1, // Aumentar opacidad
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0, // Mover a su posición original
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-    // Iniciar la animación de zoom in cuando el componente se monta
-    // Animación de deslizamiento
-  Animated.timing(translateX, {
-    toValue: 0, // Mover a la posición final
-    duration: 1500,
-    useNativeDriver: true,
-  }).start();
-
-
-
-    // Redirigir después de 3 segundos (3000ms)
+    // Redirigir después de 6 segundos (6000ms)
     const timer = setTimeout(() => {
-      setRedirecting(true); // Cambiar estado a true para mostrar el Link
+      router.push('/login'); // Navegar al login
     }, 6000);
 
     // Limpiar el timer cuando el componente se desmonte
     return () => clearTimeout(timer);
-  }, [translateX]);
+  }, [router]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido a nuestra app</Text>
-     {/* Aplicar la animación de deslizamiento a la imagen */}
-     <Animated.Image
+      {/* Texto animado */}
+      <Animated.Text
+        style={[
+          styles.title,
+          { opacity: fadeAnim, transform: [{ translateY }] },
+        ]}
+      >
+        Bienvenido a nuestra app
+      </Animated.Text>
+      {/* Imagen animada */}
+      <Animated.Image
         source={logo}
         style={[styles.image, { transform: [{ translateX }] }]} // Aplica el movimiento
       />
-      
-      {/* El enlace se muestra después de 6 segundos, pero la imagen permanece visible */}
-      <View>
-        {redirecting && (
-          <Link href="/login">
-            <Text style={styles.redirectText}>Ir al login</Text>
-          </Link>
-        )}
-      </View>
     </View>
   );
 }
@@ -56,21 +66,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-   
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#047857',
   },
   image: {
     width: 300,
     height: 230,
-  },
-  redirectText: {
-    marginTop: 20,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#047857',
   },
 });

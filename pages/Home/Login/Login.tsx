@@ -9,9 +9,16 @@ import {
 } from 'react-native';
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 
 function Login () {
+
+  const router = useRouter();
+
+  const navigateToTabs = () => {
+    router.push('/tabs'); // Cambia la ruta al destino deseado
+  };
    
 
   return (
@@ -35,7 +42,7 @@ function Login () {
         />
       </View>
 
-      {/* Campo de Contraseña */}
+      
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -45,17 +52,17 @@ function Login () {
         />
       </View>
 
-      {/* Botón de "Olvidé mi contraseña" */}
+      
       <Link href="/resetpassword">  {/* Enlace hacia la ruta de "reset-password" */}
-     {/* <TouchableOpacity>*/}
         <Text style={styles.forgotPassword}>Forgot Password?</Text>
-      {/* </TouchableOpacity>*/}
-    </Link>
+      </Link>
 
-      {/* Botón de Login */}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+     
+      <View >
+        <TouchableOpacity style={styles.button} onPress={navigateToTabs}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Enlace para registrarse */}
       <View style={styles.signUpContainer}>

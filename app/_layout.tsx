@@ -1,4 +1,4 @@
-import {Slot} from "expo-router";
+import {Slot, Stack} from "expo-router";
 import React from 'react';
 import {SafeAreaView, View, StyleSheet } from 'react-native';
 
@@ -7,6 +7,8 @@ export default function Layout() {
     <SafeAreaView style={styles.container}>
     <Slot />
     </SafeAreaView>
+
+    
   );
 }
 
