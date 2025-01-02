@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{ useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert
 } from 'react-native';
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import { Link } from 'expo-router';
@@ -15,9 +16,37 @@ import { useRouter } from 'expo-router';
 function Login () {
 
   const router = useRouter();
+  const [userName, setUserName] = useState('');
+  const [password, setPassword] = useState('');
 
   const navigateToTabs = () => {
     router.push('/tabs'); // Cambia la ruta al destino deseado
+  };
+  const handleLogin = async () => {
+    try {
+      // Cuerpo de la solicitud
+      const requestBody = { userName, password };
+      // Solicitud POST
+      const response = await fetch('http://192.168.118.132:5230/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+       console.log(response)
+      if (response.ok) {
+        const data = await response.json();
+        router.push('/tabs'); // Navegar a otra pantalla
+      } else {
+        console.log("error")
+        
+      Alert.alert('Error', 'Credenciales invalidas');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Ha ocurrido un error, ingrese más tarde');
+    }
   };
    
 
@@ -39,6 +68,8 @@ function Login () {
           placeholder="Email"
           placeholderTextColor="#aaa"
           keyboardType="email-address"
+          value={userName}
+          onChangeText={setUserName}
         />
       </View>
 
@@ -49,6 +80,8 @@ function Login () {
           placeholder="Password"
           placeholderTextColor="#aaa"
           secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
       </View>
 
@@ -59,7 +92,7 @@ function Login () {
 
      
       <View >
-        <TouchableOpacity style={styles.button} onPress={navigateToTabs}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin} >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       </View>
