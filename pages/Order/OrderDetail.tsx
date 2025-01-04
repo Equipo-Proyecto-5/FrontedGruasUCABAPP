@@ -101,10 +101,18 @@ export default function OrderDetail() {
         )}
       </View>
 
-      {/* Botón de finalización */}
-      <TouchableOpacity style={styles.finishButton}>
-        <Text style={styles.finishButtonText}>Finalizada</Text>
-      </TouchableOpacity>
+       {/* Contenedor para los botones */}
+          <View style={styles.buttonContainer}>
+            {/* Botón de Finalizar */}
+            <TouchableOpacity style={[styles.finishButton, styles.button]}>
+              <Text style={styles.finishButtonText}>Finalizar</Text>
+            </TouchableOpacity>
+
+            {/* Botón de Cancelar */}
+            <TouchableOpacity style={[styles.cancelButton, styles.button]}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
     </ScrollView>
   );
 }
@@ -116,6 +124,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
+    paddingBottom: 150,
   },
   // Estilo del contenedor de detalles de la orden
   detailContainer: {
@@ -209,16 +218,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  buttonContainer: {
+    flexDirection: 'row', // Coloca los botones en línea
+    justifyContent: 'space-between', // Espacio entre los botones
+    paddingHorizontal: 20, // Espaciado lateral
+    marginVertical: 10, // Margen vertical
+  },
+  button: {
+    flex: 1, // Cada botón ocupa la mitad del espacio disponible
+    marginHorizontal: 5, // Espaciado entre los botones
+    paddingVertical: 10, // Altura del botón
+    borderRadius: 8, // Bordes redondeados
+    alignItems: 'center', // Centrar el texto
+  },
   finishButton: {
-    backgroundColor: '#28a745',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    width: '100%',
+    backgroundColor: '#28a745', // Verde para "Finalizar"
+  },
+  cancelButton: {
+    backgroundColor: '#dc3545', // Rojo para "Cancelar"
   },
   finishButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
