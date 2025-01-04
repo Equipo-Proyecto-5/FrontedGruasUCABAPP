@@ -21,7 +21,7 @@ export default function OrderCancelled() {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} >
       <View style={styles.topSection}>
         <View style={styles.diagonal} />
       </View>
@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 80,
   },
   topSection: {
     height: height / 2,

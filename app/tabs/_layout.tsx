@@ -1,4 +1,3 @@
-import react from 'react';
 import { Tabs } from 'expo-router';
 import { MyTabBar } from '../../components/TabBar';
 

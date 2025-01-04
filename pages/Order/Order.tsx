@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 125,
   },
   topSection: {
     height: height / 2,

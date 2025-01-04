@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet } from "react-native";
+import HomeScreen from "../../pages/Home/HomeScreen/HomeScreen";
 
 
 export default function homescreen() {
-    return (
-        <View style={style.container}>
-            <Text>Home Screen</Text>
-        </View>
-    );
+    
+        return (
+            <HomeScreen />
+        );
+    
 }
 
 
