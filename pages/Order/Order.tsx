@@ -1,57 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
-
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
-const testData = [
-  { id: '1', name: 'Denunciante: Juan Perez', lugar: 'Plaza Venezuela ...', status: 'Finalizada'  },
-  { id: '2', name: 'Denunciante: Maria Ibarra', lugar: 'Las Mercedes ...', status: 'Finalizada' },
-  { id: '3', name: 'Denunciante: Diego Scaloni', lugar: 'Acarigua ...', status: 'En Proceso' },
-  { id: '4', name: 'Denunciante: Omar Velez', lugar: 'Aragua ...', status: 'Finalizada'  },
-  { id: '5', name: 'Denunciante: Pedro Sanches', lugar: 'El Paraiso ...', status: 'Finalizada'},
-  { id: '6', name: 'Denunciante: Manuel Figueroa', lugar: 'Montalban ...', status: 'Finalizada'},
-  { id: '7', name: 'Denunciante: Juan Perez', lugar: 'China ...', status: 'Finalizada'},
-  { id: '8', name: 'Denunciante: Juan Perez', lugar: 'Chacao ...', status: 'Finalizada'},
-];
-
 export default function Order({ navigation }) {
-
- 
-
+    const { userId } = useAuth();
   const [activeTab, setActiveTab] = useState('Activas');
+  const [orders, setOrders] = useState([]);  // Estado para almacenar las órdenes
+  const [loading, setLoading] = useState(true);  // Estado para controlar el loading
 
-  const sortedData = testData.sort((a, b) => {
-    if (a.status === 'En Proceso') return -1;
-    if (b.status === 'En Proceso') return 1;
+  // Llamada a la API para obtener las órdenes
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(`http://192.168.0.106:5101/OrdenesResumen/${userId}`);  // Reemplaza con la URL de tu API
+        const data = await response.json();
+        setOrders(data);  // Almacena los datos en el estado
+      } catch (error) {
+        console.error('Error al obtener las órdenes:', error);
+      } finally {
+        setLoading(false);  // Finaliza el estado de carga
+      }
+    };
+
+    fetchOrders();
+  }, []);  // La llamada solo se hace una vez al montar el componente
+
+  const sortedData = orders.sort((a, b) => {
+    if (a.estatus === 'EnProceso') return -1;
+    if (b.estatus === 'EnProceso') return 1;
     return 0;
   });
 
   const renderItem = (item) => (
-    <TouchableOpacity key={item.id} style={[
-      styles.item, 
-      item.status === 'En Proceso' && styles.enProcesoItem
-    ]}
-    onPress={() => {
-      if (item.status === 'Finalizada') {
-        navigation.navigate('OrderDetailFinish', { id: item.id });
-      } else {
-        navigation.navigate('OrderDetail', { id: item.id });
-      }
-    }} >
+    <TouchableOpacity key={item.id} style={[styles.item, item.estatus === 'EnProceso' && styles.enProcesoItem]}
+      onPress={() => {
+        if (item.estatus === 'Finalizado') {//o pagado
+          navigation.navigate('OrderDetailFinish', { id: item.id });
+        } else {
+          navigation.navigate('OrderDetail', { id: item.id });
+        }
+      }} >
       <View>
-        <Text style={[
-          styles.itemText, 
-          item.status === 'En Proceso' && styles.enProcesoText
-        ]}>{item.name}</Text>
-        <Text style={[
-          styles.descriptionText,
-          item.status === 'En Proceso' && styles.enProcesoText
-        ]}>Direccion: {item.lugar}</Text>
-        <Text style={[
-          styles.itemText, 
-          item.status === 'En Proceso' && styles.enProcesoText
-        ]}>Status: {item.status}</Text>
+        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoText]}>{item.denunciante}</Text>
+        <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Direccion Origen: {item.direccionOrigen}</Text>
+        <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Direccion Destino: {item.direccionDestino}</Text>
+        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Estatus: {item.estatus}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -62,7 +57,9 @@ export default function Order({ navigation }) {
         <View style={styles.diagonal} />
       </View>
       <View style={styles.bottomSection}>
-        {activeTab === 'Activas' ? (
+        {loading ? (
+          <Text style={styles.placeholderText}>Cargando órdenes...</Text>  // Mensaje mientras carga
+        ) : activeTab === 'Activas' && orders.length > 0 ? (
           <View>
             {sortedData.map(renderItem)}
           </View>
@@ -103,7 +100,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(11, 243, 165)',
     transform: [{ rotate: '53deg' }],
   },
-
   bottomSection: {
     flex: 1,
     backgroundColor: 'transparent', 

@@ -1,32 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const cancelledOrders = [
-  { id: '1', name: 'Denunciante: Juan Perez', lugar: 'Plaza Venezuela ...', status: 'Cancelada' },
-  { id: '2', name: 'Denunciante: Maria Ibarra', lugar: 'Las Mercedes ...', status: 'Cancelada' },
-  // Agrega más órdenes canceladas aquí
-];
-
 export default function OrderCancelled() {
+  const [cancelledOrders, setCancelledOrders] = useState([]);
+
+  // Llamada a la API para obtener los datos
+  useEffect(() => {
+    const fetchCancelledOrders = async () => {
+      try {
+        const response = await fetch('http://192.168.0.106:5101/OrdenCancelada/bde722ee-f160-4d8e-88ea-c4eaf738bcf7'); // Reemplaza con la URL correcta de tu API
+        const data = await response.json();
+        setCancelledOrders(data); // Guarda los datos en el estado
+      } catch (error) {
+        console.error('Error al obtener órdenes canceladas:', error);
+      }
+    };
+
+    fetchCancelledOrders();
+  }, []); // El array vacío asegura que la petición se haga solo una vez al cargar el componente
+
   const renderItem = (item) => (
     <View key={item.id} style={styles.item}>
       <View>
-        <Text style={styles.itemText}>{item.name}</Text>
-        <Text style={styles.descriptionText}>Direccion: {item.lugar}</Text>
-        <Text style={styles.itemText}>Status: {item.status}</Text>
+        <Text style={styles.itemText}>{item.numeroFactura}</Text>
+        <Text style={styles.descriptionText}>Direccion Origen: {item.direccionOrigen}</Text>
+        <Text style={styles.descriptionText}>Direccion Destino: {item.direcionDestino}</Text>
+        <Text style={styles.itemText}>Status: {item.estatus}</Text>
       </View>
     </View>
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} >
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.topSection}>
         <View style={styles.diagonal} />
       </View>
       <View style={styles.bottomSection}>
-        {cancelledOrders.map(renderItem)}
+        {cancelledOrders.length > 0 ? (
+          cancelledOrders.map(renderItem)
+        ) : (
+          <Text style={styles.loadingText}>Cargando órdenes canceladas...</Text>
+        )}
       </View>
     </ScrollView>
   );
@@ -82,5 +98,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'white',
     marginTop: 5,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });

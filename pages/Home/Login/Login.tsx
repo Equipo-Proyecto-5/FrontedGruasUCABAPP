@@ -10,16 +10,30 @@ import {
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../../contexts/AuthContext';
+
 
 
 function Login () {
 
   const router = useRouter();
+  const { setUserId } = useAuth();
 
-  const navigateToTabs = () => {
+  const navigateToTabs = async () => {
+    const response = await fakeLogin(); // Reemplaza con tu lógica real de login
+    const userId = response.id; // Supongamos que el login devuelve un id único
+    
+    setUserId(userId); 
     router.push('/tabs'); // Cambia la ruta al destino deseado
   };
    
+// Simula una respuesta de login
+const fakeLogin = async () => {
+  return new Promise<{ id: string }>((resolve) => {
+    setTimeout(() => resolve({ id: 'bde722ee-f160-4d8e-88ea-c4eaf738bcf7' }), 1000);
+  });}
+
+
 
   return (
     <View style={styles.container}>
