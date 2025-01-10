@@ -1,19 +1,56 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 
-export default function OrderDetailFinish({ navigation }) {
-  // Datos estáticos de ejemplo
-  const orderDetail = {
-    denunciante: "Juan Perez",
-    fecha: "01/01/2025",
-    direccion: "Plaza Venezuela, Caracas",
-    status: "Finalizada",
-    vehiculo: "Toyota Corolla, Blanco, 2015",
-    montoPagado: "$150",
-    costoAdicional: "$20",
-    detalleIncidente: "El vehículo estaba estacionado en una zona prohibida y fue remolcado por las autoridades.",
-  };
+export default function OrderDetailFinish({ route, navigation }) {
+  const { id } = route.params;
 
+  // Estados para los datos, la carga y los errores
+  const [orderDetail, setOrderDetail] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Función para obtener los datos
+    const fetchOrderDetail = async () => {
+      try {
+        console.log(id);
+        const response = await fetch(`http://192.168.0.106:5101/Orden/${id}`);//probar
+        if (!response.ok) {
+          throw new Error('Error al obtener los datos de la orden.');
+        }
+        const data = await response.json();
+        setOrderDetail(data);
+      } catch (err) {
+        setError(err.message);
+        Alert.alert('Error', err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrderDetail();
+  }, [id]);
+
+  // Mostrar indicador de carga
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#007bff" />
+        <Text>Cargando detalles de la orden...</Text>
+      </View>
+    );
+  }
+
+  // Mostrar mensaje de error si ocurre algún problema
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>Ocurrió un error: {error}</Text>
+      </View>
+    );
+  }
+
+  // Renderizar la vista si los datos están disponibles
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Detalle de Orden Finalizada</Text>
@@ -29,33 +66,36 @@ export default function OrderDetailFinish({ navigation }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.label}>Dirección:</Text>
-        <Text style={styles.value}>{orderDetail.direccion}</Text>
+        <Text style={styles.label}>Dirección Origen:</Text>
+        <Text style={styles.value}>{orderDetail.direccionOrigen}</Text>
       </View>
-
+      <View style={styles.section}>
+        <Text style={styles.label}>Dirección Destino:</Text>
+        <Text style={styles.value}>{orderDetail.direccionDestino}</Text>
+      </View>
       <View style={styles.section}>
         <Text style={styles.label}>Status:</Text>
-        <Text style={[styles.value, styles.status]}>{orderDetail.status}</Text>
+        <Text style={[styles.value, styles.status]}>{orderDetail.estatus}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Datos del Vehículo Remolcado:</Text>
-        <Text style={styles.value}>{orderDetail.vehiculo}</Text>
+        <Text style={styles.value}>{orderDetail.datosVehiculo}</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Monto Pagado:</Text>
-        <Text style={styles.value}>{orderDetail.montoPagado}</Text>
+        <Text style={styles.value}>{orderDetail.total}$</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Costo Adicional (Total):</Text>
-        <Text style={styles.value}>{orderDetail.costoAdicional}</Text>
+        <Text style={styles.value}>{orderDetail.totalCostoAdicional}$</Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Detalle de Incidente:</Text>
-        <Text style={styles.value}>{orderDetail.detalleIncidente}</Text>
+        <Text style={styles.value}>{orderDetail.detallesIncidente}</Text>
       </View>
     </ScrollView>
   );
@@ -91,5 +131,14 @@ const styles = StyleSheet.create({
   status: {
     color: '#28a745', // Verde para status "Finalizada"
     fontWeight: 'bold',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
 });

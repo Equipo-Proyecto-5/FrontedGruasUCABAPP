@@ -1,8 +1,136 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Console } from 'node:console';
 
-export default function OrderDetail() {
+export default function OrderDetail({ route }) {
+  const { id } = route.params; 
+  const [orderDetails, setOrderDetails] = useState(null); // Estado para los detalles de la orden
+  const [loading, setLoading] = useState(true); // Estado de carga
+  const [error, setError] = useState(null); // Estado para manejar errores
+  const [loadingCosts, setLoadingCosts] = useState(true); // Estado de carga para los costos adicionales
+  const [errorCosts, setErrorCosts] = useState(null); // Estado de error para los costos adicionales
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        const response = await fetch(`http://192.168.0.106:5101/Orden/${id}`);//probar
+        if (!response.ok) {
+          throw new Error(`Error al obtener los detalles: ${response.status}`);
+        }
+        const data = await response.json();
+        setOrderDetails(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchSelectedCosts = async () => {
+      try {
+        const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${id}`);
+        if (!response.ok) {
+          throw new Error(`Error al obtener los costos adicionales: ${response.status}`);
+        }
+        const data = await response.json();
+        setSelectedCosts(data);
+      } catch (err) {
+        setErrorCosts(err.message);
+      } finally {
+        setLoadingCosts(false);
+      }
+    };
+
+    fetchSelectedCosts();
+  }, [id]);
+
+// Registrar Costo
+  const sendCost = async (index) => {
+    const costToSend = selectedCosts[index]; // Obtiene el costo a enviar
+    // Verifica que el monto no esté vacío antes de enviar
+    if (!costToSend.monto) {
+      alert('Por favor, ingrese un monto antes de enviar.');
+      return;
+    }
+  
+    try {
+      // Realiza la solicitud POST al servidor
+      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idOrden:id,
+          idCostoAdicional: costToSend.nombre,
+          costo: costToSend.monto,
+          descripcion:"Costo" // Convierte el monto a un número
+        }),
+      });
+  
+      if (!response.ok) {
+        console.log(response)
+        throw new Error('Error al enviar el costo');
+      }
+  
+      // Si el envío fue exitoso, actualiza el estado local
+      const updatedCosts = [...selectedCosts];
+      updatedCosts[index].estatus = 'Por Aprobar'; // Cambia el estado a "Por Aprobar"
+      setSelectedCosts(updatedCosts);
+  
+      alert('Costo enviado con éxito.');
+    } catch (error) {
+      console.error(error.message);
+      alert('Ocurrió un error al enviar el costo.');
+    }
+  };
+  //modificar costo
+  const ModifyCost = async (index, idCosto) => {
+    const costToSend = selectedCosts[index];
+    console.log("idcosto") 
+    console.log(idCosto)// Obtiene el costo a enviar
+    // Verifica que el monto no esté vacío antes de enviar
+    if (!costToSend.monto) {
+      alert('Por favor, ingrese un monto antes de enviar.');
+      return;
+    }
+  
+    try {
+      // Realiza la solicitud POST al servidor
+      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${idCosto}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id:idCosto,
+          monto: costToSend.monto,
+          descripcion:"Costo" 
+        }),
+      });
+  
+      if (!response.ok) {
+        console.log(response)
+        throw new Error('Error al enviar el costo');
+      }
+  
+      // Si el envío fue exitoso, actualiza el estado local
+      const updatedCosts = [...selectedCosts];
+      updatedCosts[index].estatus = 'Por Aprobar'; // Cambia el estado a "Por Aprobar"
+      setSelectedCosts(updatedCosts);
+  
+      alert('Costo modificado con éxito.');
+    } catch (error) {
+      console.error(error.message);
+      alert('Ocurrió un error al modificar el costo.');
+    }
+  };
+
+
   // Estado para mostrar u ocultar la sección de costos adicionales
   const [showAdditionalCosts, setShowAdditionalCosts] = useState(false);
 
@@ -22,30 +150,56 @@ export default function OrderDetail() {
   const addCost = () => {
     const categoryToAdd = customCategory.trim() || selectedCategory;
     if (categoryToAdd) {
-      setSelectedCosts([...selectedCosts, { category: categoryToAdd, cost: '' }]);
+      setSelectedCosts([...selectedCosts, { nombre: categoryToAdd, monto: '', estatus:'' }]);
       setCustomCategory('');
     }
   };
 
   // Maneja el cambio del costo asociado a una categoría
-  const updateCost = (index, cost) => {
+  const updateCost = (index, monto) => {
     const updatedCosts = [...selectedCosts];
-    updatedCosts[index].cost = cost;
+    updatedCosts[index].monto = monto;
+    //updatedCosts[index].estatus='';
     setSelectedCosts(updatedCosts);
   };
 
   // Elimina una categoría de la lista de costos seleccionados
-  const removeCost = (index) => {
-    setSelectedCosts(selectedCosts.filter((_, i) => i !== index));
+  const removeCost = async (index) => {
+    const costToRemove = selectedCosts[index]; // Obtiene el costo a eliminar
+  
+    // Realiza la solicitud DELETE al servidor
+    try {
+      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${costToRemove.id}`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al eliminar el costo');
+      }
+  
+      // Si la eliminación fue exitosa, elimina el costo de la lista local
+      setSelectedCosts(selectedCosts.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error(error.message); // Muestra el error si ocurre
+    }
   };
 
+  if (loading) {
+    return <Text>Cargando detalles de la orden...</Text>;
+  }
+
+  // Muestra un mensaje de error si ocurrió un problema
+  if (error) {
+    return <Text>Error: {error}</Text>;
+  }
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Bloque de detalles de la orden */}
       <View style={styles.detailContainer}>
-        <Text style={styles.label}>Dirección: Calle 1, Ciudad 1</Text>
-        <Text style={styles.label}>Cliente: Juan Pérez</Text>
-        <Text style={styles.label}>Fecha: 02/01/2025</Text>
+        <Text style={styles.label}>Dirección Origen: {orderDetails?.direccionOrigen || 'No disponible'}</Text>
+        <Text style={styles.label}>Dirección Origen: {orderDetails?.direccionDestino || 'No disponible'}</Text>
+        <Text style={styles.label}>Denunciante: {orderDetails?.denunciante || 'No disponible'}</Text>
+        <Text style={styles.label}>Fecha: {orderDetails?.fecha || 'No disponible'}</Text>
       </View>
 
       {/* Bloque de costos adicionales */}
@@ -63,8 +217,8 @@ export default function OrderDetail() {
               style={styles.picker}
             >
               <Picker.Item label="Seleccione una categoría" value="" />
-              <Picker.Item label="Transporte" value="Transporte" />
-              <Picker.Item label="Mano de Obra" value="Mano de Obra" />
+              <Picker.Item label="Transporte" value="bde722ee-f160-4d8e-88ea-c4eaf738bcf7" />
+              <Picker.Item label="Mano de Obra" value="bde722ee-f160-4d8e-88ea-c4eaf738bcf8" />
               <Picker.Item label="Materiales" value="Materiales" />
             </Picker>
 
@@ -82,21 +236,40 @@ export default function OrderDetail() {
             </TouchableOpacity>
 
             {/* Lista de costos seleccionados con botón para eliminar y entrada de costo */}
-            {selectedCosts.map((item, index) => (
-              <View key={index} style={styles.costItem}>
-                <Text style={styles.costText}>{item.category}</Text>
-                <TextInput
-                  style={styles.costInput}
-                  placeholder="Costo"
-                  keyboardType="numeric"
-                  value={item.cost}
-                  onChangeText={(value) => updateCost(index, value)}
-                />
-                <TouchableOpacity onPress={() => removeCost(index)}>
+            {loadingCosts ? (
+              <Text>Cargando costos adicionales...</Text>
+            ) : errorCosts ? (
+              <Text>Error: {errorCosts}</Text>
+            ) : (
+              selectedCosts.map((item, index) => (
+                <View key={index} style={styles.costItem}>
+                  <Text style={styles.costText}>{item.nombre}</Text>
+                  {item.estatus === "" && (
+                  <TouchableOpacity onPress={() => sendCost(index)}>
+                  <Text style={styles.removeCostText}>+ </Text>
+                 </TouchableOpacity>
+                  )}
+                  {item.estatus === "Por Aprobar" && (
+                  <TouchableOpacity onPress={() => ModifyCost(index,item.id)}>
+                  <Text style={styles.removeCostText}>#</Text>
+                 </TouchableOpacity>
+                  )}
+                  <TextInput
+                    style={styles.costInput}
+                    placeholder="Costo"
+                    keyboardType="numeric"
+                    value={item.monto.toString()}
+                    onChangeText={(value) => updateCost(index, value)}
+                  />
+                  {item.estatus === "Por Aprobar" && (
+                  <TouchableOpacity onPress={() => removeCost(index)}>
                   <Text style={styles.removeCostText}>-</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+                 </TouchableOpacity>
+                  )}
+                </View>
+                
+              ))
+            )}
           </View>
         )}
       </View>
