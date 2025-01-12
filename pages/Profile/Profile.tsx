@@ -2,10 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { BackHandler } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 function Profile  ({ navigation }) {
+  const { userId, vehiculoId, username } = useAuth();
+
   const handleNavigation = (destination) => {
     console.log(`Navegando a ${destination}`);
   };
@@ -18,7 +21,7 @@ function Profile  ({ navigation }) {
         <View style={styles.profilePicture}>
           <FontAwesome name="user-circle" size={80} color="#fff" />
         </View>
-        <Text style={styles.name}>Juan Hernandez</Text>
+        <Text style={styles.name}>{username}</Text>
         <Text style={styles.role}>Conductor</Text>
       </View>
 
