@@ -1,5 +1,8 @@
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
-import React from 'react';
+import React,{ useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { useRouter} from 'expo-router';
+
 import {
   View,
   Text,
@@ -7,11 +10,52 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert
 } from 'react-native';
+import { push } from 'expo-router/build/global-state/routing';
 
 
 
 function ChangePasswordFirst() {
+    //Set de los inputs 
+    const router = useRouter();
+    const { username } = useLocalSearchParams(); // Leer parámetros
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    
+    //Funcion fech para llamar al ms de keycloack y cabiar la clave
+    const handleChangePassword = async () => {
+      if (newPassword !== confirmPassword) {
+        Alert.alert('Error', 'Las contraseñas no coinciden');
+        return;
+      }
+  
+      try {
+        const response = await fetch(`http://192.168.0.106:5230/api/auth/${username}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(
+            newPassword
+          ),
+        });
+  
+        if (response.ok) {
+          Alert.alert('Éxito', 'Contraseña cambiada correctamente');
+          router.push('/login');
+          
+        } else {
+          const errorData = await response.json();
+          Alert.alert('Error', errorData.message || 'Ocurrió un error');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'No se pudo conectar con el servidor');
+      }
+    };
+
+
+
     return (
         <View style={styles.container}>
         {/* Imagen superior */}
@@ -28,6 +72,8 @@ function ChangePasswordFirst() {
           <TextInput
             style={styles.input}
             placeholder="New Password"
+            value={newPassword}
+            onChangeText={setNewPassword}
             placeholderTextColor="#aaa"
             secureTextEntry
           />
@@ -39,6 +85,8 @@ function ChangePasswordFirst() {
             style={styles.input}
             placeholder="Confirm Password"
             placeholderTextColor="#aaa"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             secureTextEntry
           />
         </View>
@@ -46,7 +94,7 @@ function ChangePasswordFirst() {
   
        
         <View >
-          <TouchableOpacity style={styles.button} >
+          <TouchableOpacity style={styles.button}  onPress={handleChangePassword} >
             <Text style={styles.buttonText}>Cambiar Contraseña</Text>
           </TouchableOpacity>
         </View>

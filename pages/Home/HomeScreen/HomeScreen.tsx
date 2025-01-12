@@ -4,36 +4,47 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../../contexts/AuthContext';
 
 const HomeScreen = () => {
-  const { userId } = useAuth();
+  const { vehiculoId } = useAuth();
   const [order, setOrder] = useState(null);
   const [acceptedOrder, setAcceptedOrder] = useState(null); // Orden aceptada
   const [inProgressOrder, setInProgressOrder] = useState(null); // Orden en progreso
+  const [inLocatedOrder, setInLocatedOrder] = useState(null); // Orden en progreso
+  const [inFinalizedOrder, setInFinalizedOrder] = useState(null); // Orden en progreso
 
   const [loading, setLoading] = useState(true);
-
+  const [idOrden,setIdOrden]=useState(null);
   // Fetch order on component mount
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await fetch(`http://192.168.0.106:5101/OrdenVigente/${userId}`);
+        const response = await fetch(`http://192.168.0.106:5101/OrdenVigente/${vehiculoId}`);
         const text = await response.text();
-        console.log(text); // Debug: log response
         const data = JSON.parse(text);
         if (data.estatus==="PorAceptar")
         {
           setOrder(data);
-          console.log("1");
+          setIdOrden(data.id)
         } 
         if (data.estatus==="Aceptado")
+        {
+          setAcceptedOrder(data);
+          setIdOrden(data.id)
+        }
+        if (data.estatus==="Localizado")
           {
-            setAcceptedOrder(data);
-            console.log("2")
+             setInLocatedOrder(data);
+             setIdOrden(data.id)
+          }  
+        if (data.estatus==="EnProgreso")
+          {
+           setInProgressOrder(data);
+           setIdOrden(data.id)
+          }  
+          if (data.estatus==="Finalizado")
+          {
+            setIdOrden(data.id)
+            setInFinalizedOrder(data)
           }
-          if (data.estatus==="Localizado")
-            {
-              setInProgressOrder(data);
-              console.log("3")
-            }  
       } catch (error) {
         console.error('Error fetching order:', error);
       } finally {
@@ -80,24 +91,40 @@ const HomeScreen = () => {
       console.error('Error rejecting order:', error);
     }
   };
+  //Actualizar Estatus
   const handleLocalize = async () => {
-    if (!acceptedOrder) return;
 
     try {
-      await fetch(`http://192.168.0.106:5101/status/${acceptedOrder.id}`, {
+      await fetch(`http://192.168.0.106:5101/status/${idOrden}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify("Actualizar"),
       });
+    if (acceptedOrder){
+      setInLocatedOrder(acceptedOrder)
+      setAcceptedOrder(null);
+    }
+    if(inLocatedOrder){
+      setInProgressOrder(inLocatedOrder)
+      setInLocatedOrder(null)
+    }
+    if(inProgressOrder){
+      setInFinalizedOrder(inProgressOrder)
+      setInProgressOrder(null)
+    }
+    if(inFinalizedOrder){
+      setInFinalizedOrder(null)
+    }
 
-    setInProgressOrder(acceptedOrder);
-    setAcceptedOrder(null); // Remove the order after accepting
     } catch (error) {
       console.error('Error accepting order:', error);
     }
   };
+
+
+
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
@@ -113,7 +140,7 @@ const HomeScreen = () => {
         colors={['#0bf3a5', '#56ab2f']}
         style={styles.header}
       >
-        <Text style={styles.headerText}>¡Bienvenido, User 1!</Text>
+        <Text style={styles.headerText}>¡Bienvenido! </Text>
       </LinearGradient>
 
       {/* Orden disponible */}
@@ -151,9 +178,9 @@ const HomeScreen = () => {
             <Text style={styles.cardText}>Origen: {acceptedOrder.direccionOrigen}</Text>
             <Text style={styles.cardText}>Destino: {acceptedOrder.direccionDestino}</Text>
             <Text style={styles.cardTextinfo}>
-              {inProgressOrder ? 'Vehículo localizado' : 'Presione cuando tenga localizado el vehículo'}
+              {inLocatedOrder? 'Vehículo localizado' : 'Presione cuando tenga localizado el vehículo'}
             </Text>
-            {!inProgressOrder && (
+            {!inLocatedOrder && (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={[styles.button, styles.acceptButton]}
@@ -166,6 +193,25 @@ const HomeScreen = () => {
           </View>
         </>
       )}
+       {/* Orden Localizada */}
+       {inLocatedOrder && (
+        <>
+          <Text style={styles.sectionTitle}>Orden Localizada:</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardText}>Origen: {inLocatedOrder.direccionOrigen}</Text>
+            <Text style={styles.cardText}>Destino: {inLocatedOrder.direccionDestino}</Text>
+            <Text style={styles.cardTextinfo}>
+              {inProgressOrder ? 'Orden en Progreso' : 'Presione cuando tenga la orden en progreso'}
+            </Text>
+            <TouchableOpacity
+              style={[styles.button, styles.acceptButton]}
+              onPress={handleLocalize}
+            >
+              <Text style={styles.buttonText}>Confirmar Orden en Proceso</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
 
       {/* Orden en progreso */}
       {inProgressOrder && (
@@ -174,14 +220,38 @@ const HomeScreen = () => {
           <View style={styles.card}>
             <Text style={styles.cardText}>Origen: {inProgressOrder.direccionOrigen}</Text>
             <Text style={styles.cardText}>Destino: {inProgressOrder.direccionDestino}</Text>
+            <Text style={styles.cardTextinfo}>
+               Presione cuando la orden finalice
+            </Text>
             <TouchableOpacity
               style={[styles.button, styles.acceptButton]}
+              onPress={handleLocalize}
             >
-              <Text style={styles.buttonText}>Confirmar Orden en Proceso</Text>
+              <Text style={styles.buttonText}>Finalizar</Text>
             </TouchableOpacity>
           </View>
         </>
       )}
+      {/* Orden Finalizada */}
+      {inFinalizedOrder && (
+        <>
+          <Text style={styles.sectionTitle}>Orden en Progreso:</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardText}>Origen: {inFinalizedOrder.direccionOrigen}</Text>
+            <Text style={styles.cardText}>Destino: {inFinalizedOrder.direccionDestino}</Text>
+            <Text style={styles.cardTextinfo}>
+               Presione cuando la orden sea cancelada
+            </Text>
+            <TouchableOpacity
+              style={[styles.button, styles.acceptButton]}
+              onPress={handleLocalize}
+            >
+              <Text style={styles.buttonText}>Pagado</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+      
     </ScrollView>
   );
  

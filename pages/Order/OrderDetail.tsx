@@ -29,24 +29,40 @@ export default function OrderDetail({ route }) {
     fetchOrderDetails();
   }, [id]);
 
-  useEffect(() => {
-    const fetchSelectedCosts = async () => {
-      try {
-        const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${id}`);
-        if (!response.ok) {
-          throw new Error(`Error al obtener los costos adicionales: ${response.status}`);
-        }
-        const data = await response.json();
-        setSelectedCosts(data);
-      } catch (err) {
-        setErrorCosts(err.message);
-      } finally {
-        setLoadingCosts(false);
-      }
-    };
 
+
+  // Función para obtener los costos (GET)
+  const fetchSelectedCosts = async () => {
+    try {
+      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${id}`);
+      if (!response.ok) {
+        throw new Error(`Error al obtener los costos adicionales: ${response.status}`);
+      }
+      const data = await response.json();
+      setSelectedCosts(data);
+    } catch (err) {
+      setErrorCosts(err.message);
+    } finally {
+      setLoadingCosts(false);
+    }
+  };
+
+  // Hook para cargar los costos al montar la pantalla o cambiar el `id`
+  useEffect(() => {
     fetchSelectedCosts();
   }, [id]);
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Registrar Costo
   const sendCost = async (index) => {
@@ -56,7 +72,7 @@ export default function OrderDetail({ route }) {
       alert('Por favor, ingrese un monto antes de enviar.');
       return;
     }
-  
+   const idCosto=evaluarCosto(costToSend.nombre);
     try {
       // Realiza la solicitud POST al servidor
       const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional`, {
@@ -66,7 +82,7 @@ export default function OrderDetail({ route }) {
         },
         body: JSON.stringify({
           idOrden:id,
-          idCostoAdicional: costToSend.nombre,
+          idCostoAdicional: idCosto,
           costo: costToSend.monto,
           descripcion:"Costo" // Convierte el monto a un número
         }),
@@ -78,11 +94,13 @@ export default function OrderDetail({ route }) {
       }
   
       // Si el envío fue exitoso, actualiza el estado local
-      const updatedCosts = [...selectedCosts];
-      updatedCosts[index].estatus = 'Por Aprobar'; // Cambia el estado a "Por Aprobar"
-      setSelectedCosts(updatedCosts);
+     // const updatedCosts = [...selectedCosts];
+     // updatedCosts[index].estatus = 'Por Aprobar'; // Cambia el estado a "Por Aprobar"
+      //setSelectedCosts(updatedCosts);
   
       alert('Costo enviado con éxito.');
+      await fetchSelectedCosts(); // Llama a la función GET para actualizar los datos
+
     } catch (error) {
       console.error(error.message);
       alert('Ocurrió un error al enviar el costo.');
@@ -129,13 +147,33 @@ export default function OrderDetail({ route }) {
       alert('Ocurrió un error al modificar el costo.');
     }
   };
+//Cancelar Orden
+const handleCancel = async () => {
 
-
+  try {
+    await fetch(`http://192.168.0.106:5101/status/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify("Cancelar"),
+    });
+  } catch (error) {
+    console.error('Error canceled order:', error);
+  }
+};
+// Adquirir el id del costo adiciona seleccionado
+const evaluarCosto = (nombreCosto: string): string => {
+ if (nombreCosto==="Transporte"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf7"}
+ if (nombreCosto==="Mano de Obra"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf8"}
+ if (nombreCosto==="Materiales"){return ""}
+  
+};
   // Estado para mostrar u ocultar la sección de costos adicionales
   const [showAdditionalCosts, setShowAdditionalCosts] = useState(false);
 
   // Estado para manejar la entrada de una categoría personalizada
-  const [customCategory, setCustomCategory] = useState('');
+  //const [customCategory, setCustomCategory] = useState('');
 
   // Estado para almacenar las categorías seleccionadas junto con sus costos
   const [selectedCosts, setSelectedCosts] = useState([]);
@@ -148,10 +186,10 @@ export default function OrderDetail({ route }) {
 
   // Agrega una categoría personalizada o seleccionada a la lista de costos seleccionados
   const addCost = () => {
-    const categoryToAdd = customCategory.trim() || selectedCategory;
+    const categoryToAdd = selectedCategory;
     if (categoryToAdd) {
       setSelectedCosts([...selectedCosts, { nombre: categoryToAdd, monto: '', estatus:'' }]);
-      setCustomCategory('');
+     
     }
   };
 
@@ -164,9 +202,9 @@ export default function OrderDetail({ route }) {
   };
 
   // Elimina una categoría de la lista de costos seleccionados
-  const removeCost = async (index) => {
+  const removeCost = async (index,idCosto) => {
     const costToRemove = selectedCosts[index]; // Obtiene el costo a eliminar
-  
+    console.log(idCosto)
     // Realiza la solicitud DELETE al servidor
     try {
       const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${costToRemove.id}`, {
@@ -179,6 +217,8 @@ export default function OrderDetail({ route }) {
   
       // Si la eliminación fue exitosa, elimina el costo de la lista local
       setSelectedCosts(selectedCosts.filter((_, i) => i !== index));
+     
+
     } catch (error) {
       console.error(error.message); // Muestra el error si ocurre
     }
@@ -217,18 +257,13 @@ export default function OrderDetail({ route }) {
               style={styles.picker}
             >
               <Picker.Item label="Seleccione una categoría" value="" />
-              <Picker.Item label="Transporte" value="bde722ee-f160-4d8e-88ea-c4eaf738bcf7" />
-              <Picker.Item label="Mano de Obra" value="bde722ee-f160-4d8e-88ea-c4eaf738bcf8" />
+              <Picker.Item label="Transporte" value="Transporte" />
+              <Picker.Item label="Mano de Obra" value="Mano de Obra" />
               <Picker.Item label="Materiales" value="Materiales" />
             </Picker>
 
             {/* Campo de entrada para una categoría personalizada */}
-            <TextInput
-              style={styles.input}
-              placeholder="Otra categoría"
-              value={customCategory}
-              onChangeText={setCustomCategory}
-            />
+            
 
             {/* Botón para agregar la categoría */}
             <TouchableOpacity style={styles.addCostButton} onPress={addCost}>
@@ -246,12 +281,12 @@ export default function OrderDetail({ route }) {
                   <Text style={styles.costText}>{item.nombre}</Text>
                   {item.estatus === "" && (
                   <TouchableOpacity onPress={() => sendCost(index)}>
-                  <Text style={styles.removeCostText}>+ </Text>
+                  <Text style={styles.removeCostText}> + </Text>
                  </TouchableOpacity>
                   )}
                   {item.estatus === "Por Aprobar" && (
                   <TouchableOpacity onPress={() => ModifyCost(index,item.id)}>
-                  <Text style={styles.removeCostText}>#</Text>
+                  <Text style={styles.removeCostText}> #  </Text>
                  </TouchableOpacity>
                   )}
                   <TextInput
@@ -262,8 +297,8 @@ export default function OrderDetail({ route }) {
                     onChangeText={(value) => updateCost(index, value)}
                   />
                   {item.estatus === "Por Aprobar" && (
-                  <TouchableOpacity onPress={() => removeCost(index)}>
-                  <Text style={styles.removeCostText}>-</Text>
+                  <TouchableOpacity onPress={() => removeCost(index,item.id)}>
+                  <Text style={styles.removeCostText}> - </Text>
                  </TouchableOpacity>
                   )}
                 </View>
@@ -276,13 +311,9 @@ export default function OrderDetail({ route }) {
 
        {/* Contenedor para los botones */}
           <View style={styles.buttonContainer}>
-            {/* Botón de Finalizar */}
-            <TouchableOpacity style={[styles.finishButton, styles.button]}>
-              <Text style={styles.finishButtonText}>Finalizar</Text>
-            </TouchableOpacity>
 
             {/* Botón de Cancelar */}
-            <TouchableOpacity style={[styles.cancelButton, styles.button]}>
+            <TouchableOpacity style={[styles.cancelButton, styles.button]} onPress={handleCancel}>
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>

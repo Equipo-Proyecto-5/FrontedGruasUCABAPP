@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const { width, height } = Dimensions.get('window');
 
 export default function Order({ navigation }) {
-    const { userId } = useAuth();
+  const { vehiculoId } = useAuth();
   const [activeTab, setActiveTab] = useState('Activas');
   const [orders, setOrders] = useState([]);  // Estado para almacenar las órdenes
   const [loading, setLoading] = useState(true);  // Estado para controlar el loading
@@ -14,19 +14,18 @@ export default function Order({ navigation }) {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`http://192.168.0.106:5101/OrdenesResumen/${userId}`);  // Reemplaza con la URL de tu API
+        const response = await fetch(`http://192.168.0.106:5101/OrdenesResumen/${vehiculoId}`);  // Reemplaza con la URL de tu API
         const data = await response.json();
-        setOrders(data);  // Almacena los datos en el estado
+        setOrders(data);  
       } catch (error) {
         console.error('Error al obtener las órdenes:', error);
       } finally {
-        setLoading(false);  // Finaliza el estado de carga
+        setLoading(false);  
       }
     };
 
     fetchOrders();
-  }, []);  // La llamada solo se hace una vez al montar el componente
-
+  }, []);  
   const sortedData = orders.sort((a, b) => {
     if (a.estatus === 'EnProceso') return -1;
     if (b.estatus === 'EnProceso') return 1;
@@ -36,9 +35,9 @@ export default function Order({ navigation }) {
   const renderItem = (item) => (
     <TouchableOpacity key={item.id} style={[styles.item, item.estatus === 'EnProceso' && styles.enProcesoItem]}
       onPress={() => {
-        if (item.estatus === 'Finalizado') {//o pagado
+        if (item.estatus === 'Finalizado' || item.estatus==='Pagado') {
           navigation.navigate('OrderDetailFinish', { id: item.id });
-        } else {
+        } else if (item.estatus==='Aceptado'||item.estatus==='Localizado'|| item.estatus==='EnProceso') {
           navigation.navigate('OrderDetail', { id: item.id });
         }
       }} >

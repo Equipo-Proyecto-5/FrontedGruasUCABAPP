@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,62 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert
 } from 'react-native';
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import { Link } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { useRouter} from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-
 
 
 function Login () {
 
   const router = useRouter();
-  const { setUserId } = useAuth();
+  const [userName, setUserName] = useState('');
+  const [password, setPassword] = useState('');
+  const { setUserId, setVehiculoId, setUsername } = useAuth();
 
-  const navigateToTabs = async () => {
-    const response = await fakeLogin(); // Reemplaza con tu lógica real de login
-    const userId = response.id; // Supongamos que el login devuelve un id único
-    
-    setUserId(userId); 
-    router.push('/tabs'); // Cambia la ruta al destino deseado
+  const handleLogin = async () => {
+    try {
+      const requestBody = { userName, password };
+      const response = await fetch('http://192.168.0.106:5230/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+       console.log(response)
+       if (response.status === 403)
+        {
+          router.push({
+          pathname: '/changepassword',
+          params: { username: userName }, // Paso del parámetro
+        });
+        }
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.role==="Conductor"){
+        const responseAdicional = await fetch(`http://192.168.0.106:5163/api/Usuario/Conductor/${userName}`);  // Reemplaza con la URL de tu API
+        const dataAdicional = await responseAdicional.json();
+      //Setear Contexto y redirigir a la pag principal
+        setUserId(dataAdicional.id);
+        setVehiculoId(dataAdicional.idGrua);
+        setUsername(data.username);
+        router.push('/tabs');
+      }
+      } else {
+        console.log("error")
+        
+      Alert.alert('Error', 'Credenciales invalidas');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Ha ocurrido un error, ingrese más tarde');
+    }
   };
    
-// Simula una respuesta de login
-const fakeLogin = async () => {
-  return new Promise<{ id: string }>((resolve) => {
-    setTimeout(() => resolve({ id: 'bde722ee-f160-4d8e-88ea-c4eaf738bcf7' }), 1000);
-  });}
-
-
-
   return (
     <View style={styles.container}>
       {/* Imagen superior */}
@@ -53,6 +80,8 @@ const fakeLogin = async () => {
           placeholder="Email"
           placeholderTextColor="#aaa"
           keyboardType="email-address"
+          value={userName}
+          onChangeText={setUserName}
         />
       </View>
 
@@ -62,6 +91,8 @@ const fakeLogin = async () => {
           style={styles.input}
           placeholder="Password"
           placeholderTextColor="#aaa"
+          value={password}
+          onChangeText={setPassword}
           secureTextEntry
         />
       </View>
@@ -73,16 +104,8 @@ const fakeLogin = async () => {
 
      
       <View >
-        <TouchableOpacity style={styles.button} onPress={navigateToTabs}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Enlace para registrarse */}
-      <View style={styles.signUpContainer}>
-        <Text>Don’t you have an account? </Text>
-        <TouchableOpacity>
-          <Text style={styles.signUpText}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     </View>
