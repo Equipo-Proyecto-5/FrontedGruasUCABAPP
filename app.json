@@ -19,10 +19,18 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package":"dev.expo.gruasucab",
+      "googleServicesFile":"./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "750138d9-0dc4-4520-9cd1-3cd3d66a6f98"
+      }
+    },
+    "owner": "gaby.martinez"
   }
 }

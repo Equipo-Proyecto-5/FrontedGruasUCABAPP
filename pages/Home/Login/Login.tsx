@@ -11,6 +11,8 @@ import {
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import messaging from '@react-native-firebase/messaging';
+
 
 
 function Login () {
@@ -18,16 +20,27 @@ function Login () {
   const router = useRouter();
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  
 
-  const navigateToTabs = () => {
-    router.push('/tabs'); // Cambia la ruta al destino deseado
-  };
+  
   const handleLogin = async () => {
     try {
       // Cuerpo de la solicitud
+     
+      const authStatus = await messaging().requestPermission();
+      const isAuthorized =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    
+      if (isAuthorized) {
+        const token = await messaging().getToken();
+        console.log('FCM Token:', token);}
+        router.push('/tabs');
+     
       const requestBody = { userName, password };
+
       // Solicitud POST
-      const response = await fetch('http://192.168.118.132:5230/api/auth/login', {
+      const response = await fetch('http://192.168.0.106:5230/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,6 +50,22 @@ function Login () {
        console.log(response)
       if (response.ok) {
         const data = await response.json();
+        const token = await messaging().getToken();
+        const registerTokenResponse = await fetch(
+          "http://192.168.0.106:5163/registrarToken",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              // Envía el token JWT si es necesario
+            },
+            body: JSON.stringify({
+              userName,
+              token,
+            }),
+          }
+        );
+
         router.push('/tabs'); // Navegar a otra pantalla
       } else {
         console.log("error")
