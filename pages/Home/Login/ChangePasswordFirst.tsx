@@ -13,6 +13,7 @@ import {
   Alert
 } from 'react-native';
 import { push } from 'expo-router/build/global-state/routing';
+import messaging from '@react-native-firebase/messaging';
 
 
 
@@ -43,6 +44,22 @@ function ChangePasswordFirst() {
   
         if (response.ok) {
           Alert.alert('Éxito', 'Contraseña cambiada correctamente');
+          //Registrar token usuario
+          const token = await messaging().getToken();
+          const registerTokenResponse = await fetch(
+          "http://192.168.0.106:5163/registrarToken",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              // Envía el token JWT si es necesario
+            },
+            body: JSON.stringify({
+              username,
+              token,
+            }),
+          }
+        );
           router.push('/login');
           
         } else {
