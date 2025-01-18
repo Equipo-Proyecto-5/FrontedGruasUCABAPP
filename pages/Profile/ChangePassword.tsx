@@ -27,7 +27,7 @@ function ChangePassword() {
         return;
       }
       try {
-        const response = await fetch(`http://192.168.0.106:5230/api/auth/${username}`, {
+        const response = await fetch(`http://ec2-3-143-211-2.us-east-2.compute.amazonaws.com:5230/api/auth/${username}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

@@ -10,7 +10,7 @@ export default function OrderCancelled() {
   useEffect(() => {
     const fetchCancelledOrders = async () => {
       try {
-        const response = await fetch('http://192.168.0.106:5101/OrdenCancelada/bde722ee-f160-4d8e-88ea-c4eaf738bcf7'); // Reemplaza con la URL correcta de tu API
+        const response = await fetch('http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/OrdenCancelada/bde722ee-f160-4d8e-88ea-c4eaf738bcf7'); // Reemplaza con la URL correcta de tu API
         const data = await response.json();
         setCancelledOrders(data); // Guarda los datos en el estado
       } catch (error) {

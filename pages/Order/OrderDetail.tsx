@@ -13,7 +13,7 @@ export default function OrderDetail({ route }) {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.0.106:5101/Orden/${id}`);//probar
+        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/Orden/${id}`);//probar
         if (!response.ok) {
           throw new Error(`Error al obtener los detalles: ${response.status}`);
         }
@@ -34,7 +34,7 @@ export default function OrderDetail({ route }) {
   // Función para obtener los costos (GET)
   const fetchSelectedCosts = async () => {
     try {
-      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${id}`);
+      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional/${id}`);
       if (!response.ok) {
         throw new Error(`Error al obtener los costos adicionales: ${response.status}`);
       }
@@ -75,7 +75,7 @@ export default function OrderDetail({ route }) {
    const idCosto=evaluarCosto(costToSend.nombre);
     try {
       // Realiza la solicitud POST al servidor
-      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional`, {
+      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ export default function OrderDetail({ route }) {
   
     try {
       // Realiza la solicitud POST al servidor
-      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${idCosto}`, {
+      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional/${idCosto}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ const evaluarCosto = (nombreCosto: string): string => {
     console.log(idCosto)
     // Realiza la solicitud DELETE al servidor
     try {
-      const response = await fetch(`http://192.168.0.106:5101/api/CostoAdicional/${costToRemove.id}`, {
+      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional/${costToRemove.id}`, {
         method: 'DELETE',
       });
   

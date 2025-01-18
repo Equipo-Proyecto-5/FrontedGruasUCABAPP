@@ -14,7 +14,7 @@ export default function Order({ navigation }) {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`http://192.168.0.106:5101/OrdenesResumen/${vehiculoId}`);  // Reemplaza con la URL de tu API
+        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/OrdenesResumen/${vehiculoId}`);  // Reemplaza con la URL de tu API
         const data = await response.json();
         setOrders(data);  
       } catch (error) {

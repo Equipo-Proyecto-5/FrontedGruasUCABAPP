@@ -17,7 +17,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await fetch(`http://192.168.0.106:5101/OrdenVigente/${vehiculoId}`);
+        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/OrdenVigente/${vehiculoId}`);
         const text = await response.text();
         const data = JSON.parse(text);
         if (data.estatus==="PorAceptar")
@@ -59,7 +59,7 @@ const HomeScreen = () => {
     if (!order) return;
 
     try {
-      await fetch(`http://192.168.0.106:5101/status/${order.id}`, {
+      await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/status/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const HomeScreen = () => {
     if (!order) return;
 
     try {
-      await fetch(`http://192.168.0.106:5101/status/${order.id}`, {
+      await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/status/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ const HomeScreen = () => {
   const handleLocalize = async () => {
 
     try {
-      await fetch(`http://192.168.0.106:5101/status/${idOrden}`, {
+      await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/status/${idOrden}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
