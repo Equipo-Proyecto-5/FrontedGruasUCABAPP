@@ -14,7 +14,7 @@ export default function OrderDetailFinish({ route, navigation }) {
     const fetchOrderDetail = async () => {
       try {
         console.log(id);
-        const response = await fetch(`http://192.168.0.106:5101/Orden/${id}`);//probar
+        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/Orden/${id}`);//probar
         if (!response.ok) {
           throw new Error('Error al obtener los datos de la orden.');
         }

@@ -19,7 +19,7 @@ function ForgotPassword() {
      // Cuerpo de la solicitud
      const requestBody = { email };
      // Solicitud POST
-     const response = await fetch('http://192.168.0.106:5230/api/auth/password-reset', {
+     const response = await fetch('http://ec2-3-143-211-2.us-east-2.compute.amazonaws.com:5230/api/auth/password-reset', {
        method: 'POST',
        headers: {
          'Content-Type': 'application/json',

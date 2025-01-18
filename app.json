@@ -20,8 +20,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package":"dev.gruasucab.app",
-      "googleServicesFile":"./google-services.json"
+      "package": "dev.gruasucab.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +31,9 @@
         "projectId": "1a9f658f-2936-4640-b8bf-5d8731af41d2"
       }
     },
-    "owner": "gaby.martinez"
+    "owner": "gaby.martinez",
+    "plugins": [[
+      "expo-build-properties", { "android": { "usesCleartextTraffic": true } }
+    ]]
   }
 }
