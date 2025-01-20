@@ -137,7 +137,7 @@ const HomeScreen = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Header estilizado */}
       <LinearGradient
-        colors={['#0bf3a5', '#56ab2f']}
+        colors={['#047857', '#047857']}
         style={styles.header}
       >
         <Text style={styles.headerText}>¡Bienvenido! </Text>
@@ -148,6 +148,7 @@ const HomeScreen = () => {
         <>
           <Text style={styles.sectionTitle}>Orden Disponible:</Text>
           <View style={styles.card}>
+          <Text style={styles.cardTitle}>N.ORDEN  {order.numeroFactura}</Text>
             <Text style={styles.cardText}>Origen: {order.direccionOrigen}</Text>
             <Text style={styles.cardText}>Destino: {order.direccionDestino}</Text>
             <View style={styles.buttonContainer}>
@@ -175,6 +176,7 @@ const HomeScreen = () => {
         <>
           <Text style={styles.sectionTitle}>Orden Aceptada:</Text>
           <View style={[styles.card, styles.acceptedCard]}>
+          <Text style={styles.cardTitle}>N.ORDEN  {acceptedOrder.numeroFactura}</Text>
             <Text style={styles.cardText}>Origen: {acceptedOrder.direccionOrigen}</Text>
             <Text style={styles.cardText}>Destino: {acceptedOrder.direccionDestino}</Text>
             <Text style={styles.cardTextinfo}>
@@ -198,6 +200,7 @@ const HomeScreen = () => {
         <>
           <Text style={styles.sectionTitle}>Orden Localizada:</Text>
           <View style={styles.card}>
+          <Text style={styles.cardTitle}>N.ORDEN  {inLocatedOrder.numeroFactura}</Text>
             <Text style={styles.cardText}>Origen: {inLocatedOrder.direccionOrigen}</Text>
             <Text style={styles.cardText}>Destino: {inLocatedOrder.direccionDestino}</Text>
             <Text style={styles.cardTextinfo}>
@@ -218,6 +221,7 @@ const HomeScreen = () => {
         <>
           <Text style={styles.sectionTitle}>Orden en Progreso:</Text>
           <View style={styles.card}>
+          <Text style={styles.cardTitle}>N.ORDEN  {inProgressOrder.numeroFactura}</Text>
             <Text style={styles.cardText}>Origen: {inProgressOrder.direccionOrigen}</Text>
             <Text style={styles.cardText}>Destino: {inProgressOrder.direccionDestino}</Text>
             <Text style={styles.cardTextinfo}>
@@ -256,6 +260,7 @@ const HomeScreen = () => {
   );
  
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -276,12 +281,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+    overflow: 'hidden', // Para bordes
   },
   headerText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)', // Sombra sutil al texto
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
   },
   sectionTitle: {
     fontSize: 18,
@@ -307,6 +316,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 8,
     elevation: 10,
+  },
+  cardTitle: {
+    fontSize: 20,
+    marginBottom: 5,
+    fontWeight: '900',
+    color: 'rgb(169, 188, 219)',
+    marginVertical: 10,
   },
   cardText: {
     fontSize: 16,

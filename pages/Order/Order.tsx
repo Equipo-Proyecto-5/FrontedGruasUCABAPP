@@ -10,6 +10,8 @@ export default function Order({ navigation }) {
   const [orders, setOrders] = useState([]);  // Estado para almacenar las órdenes
   const [loading, setLoading] = useState(true);  // Estado para controlar el loading
 
+  
+
   // Llamada a la API para obtener las órdenes
   useEffect(() => {
     const fetchOrders = async () => {
@@ -42,10 +44,11 @@ export default function Order({ navigation }) {
         }
       }} >
       <View>
-        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoText]}>{item.denunciante}</Text>
+         <Text style={styles.cardTitle}>N.ORDEN  {item.numeroFactura}</Text>
+        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoTextTitle]}>Denunciante: {item.denunciante}</Text>
         <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Direccion Origen: {item.direccionOrigen}</Text>
         <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Direccion Destino: {item.direccionDestino}</Text>
-        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Estatus: {item.estatus}</Text>
+        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoTextTitle]}>Estatus: {item.estatus}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -53,7 +56,7 @@ export default function Order({ navigation }) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.topSection}>
-        <View style={styles.diagonal} />
+        <View />
       </View>
       <View style={styles.bottomSection}>
         {loading ? (
@@ -96,8 +99,8 @@ const styles = StyleSheet.create({
     left: 0,
     width: width,
     height: height,
-    backgroundColor: 'rgb(11, 243, 165)',
-    transform: [{ rotate: '53deg' }],
+    backgroundColor: 'rgb(111, 120, 135)',
+    transform: [{ rotate: '-53deg' }],
   },
   bottomSection: {
     flex: 1,
@@ -130,12 +133,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   enProcesoItem: {
-    backgroundColor: 'rgb(191, 228, 216)', 
+    backgroundColor: '#047857', 
   },
   enProcesoText: {
+    fontSize: 15,
+    color: 'white',
+  },
+  enProcesoTextTitle: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
   },
   placeholderText: {
     textAlign: 'center',
@@ -163,5 +170,13 @@ const styles = StyleSheet.create({
   floatingButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+
+  cardTitle: {
+    fontSize: 20,
+    marginBottom: 5,
+    fontWeight: '900',
+    color: 'rgb(169, 188, 219)',
+    marginVertical: 10,
   },
 });
