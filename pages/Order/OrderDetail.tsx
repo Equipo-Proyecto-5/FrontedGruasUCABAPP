@@ -236,6 +236,7 @@ const evaluarCosto = (nombreCosto: string): string => {
     <ScrollView contentContainerStyle={styles.container}>
       {/* Bloque de detalles de la orden */}
       <View style={styles.detailContainer}>
+      <Text style={styles.cardTitle}>N.ORDEN {orderDetails?.numeroFactura || 'No disponible'}</Text>
         <Text style={styles.label}>Dirección Origen: {orderDetails?.direccionOrigen || 'No disponible'}</Text>
         <Text style={styles.label}>Dirección Origen: {orderDetails?.direccionDestino || 'No disponible'}</Text>
         <Text style={styles.label}>Denunciante: {orderDetails?.denunciante || 'No disponible'}</Text>
@@ -346,7 +347,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   // Bloque de costos adicionales
   additionalCostsBlock: {
@@ -450,5 +451,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+
+  cardTitle: {
+    fontSize: 20,
+    marginBottom: 5,
+    fontWeight: '900',
+    color: 'rgb(169, 188, 219)',
+    marginVertical: 10,
   },
 });

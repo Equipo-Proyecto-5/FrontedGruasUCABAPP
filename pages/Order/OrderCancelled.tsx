@@ -34,8 +34,8 @@ export default function OrderCancelled() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.topSection}>
-        <View style={styles.diagonal} />
+      <View>
+        <View />
       </View>
       <View style={styles.bottomSection}>
         {cancelledOrders.length > 0 ? (
