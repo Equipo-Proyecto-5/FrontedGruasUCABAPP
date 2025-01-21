@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Console } from 'node:console';
-
+import { API_URLS } from '../../config/config';
 export default function OrderDetail({ route }) {
   const { id } = route.params; 
   const [orderDetails, setOrderDetails] = useState(null); // Estado para los detalles de la orden
@@ -13,7 +13,7 @@ export default function OrderDetail({ route }) {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/Orden/${id}`);//probar
+        const response = await fetch(`${API_URLS.BASE_URL_ORDER}/Orden/${id}`);//probar
         if (!response.ok) {
           throw new Error(`Error al obtener los detalles: ${response.status}`);
         }
@@ -34,7 +34,7 @@ export default function OrderDetail({ route }) {
   // Función para obtener los costos (GET)
   const fetchSelectedCosts = async () => {
     try {
-      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional/${id}`);
+      const response = await fetch(`${API_URLS.BASE_URL_ORDER}/api/CostoAdicional/${id}`);
       if (!response.ok) {
         throw new Error(`Error al obtener los costos adicionales: ${response.status}`);
       }
@@ -52,18 +52,6 @@ export default function OrderDetail({ route }) {
     fetchSelectedCosts();
   }, [id]);
 
-
-
-
-
-
-
-
-
-
-
-
-
 // Registrar Costo
   const sendCost = async (index) => {
     const costToSend = selectedCosts[index]; // Obtiene el costo a enviar
@@ -75,7 +63,7 @@ export default function OrderDetail({ route }) {
    const idCosto=evaluarCosto(costToSend.nombre);
     try {
       // Realiza la solicitud POST al servidor
-      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional`, {
+      const response = await fetch(`${API_URLS.BASE_URL_ORDER}/api/CostoAdicional`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,12 +80,7 @@ export default function OrderDetail({ route }) {
         console.log(response)
         throw new Error('Error al enviar el costo');
       }
-  
-      // Si el envío fue exitoso, actualiza el estado local
-     // const updatedCosts = [...selectedCosts];
-     // updatedCosts[index].estatus = 'Por Aprobar'; // Cambia el estado a "Por Aprobar"
-      //setSelectedCosts(updatedCosts);
-  
+
       alert('Costo enviado con éxito.');
       await fetchSelectedCosts(); // Llama a la función GET para actualizar los datos
 
@@ -119,7 +102,7 @@ export default function OrderDetail({ route }) {
   
     try {
       // Realiza la solicitud POST al servidor
-      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional/${idCosto}`, {
+      const response = await fetch(`${API_URLS.BASE_URL_ORDER}/api/CostoAdicional/${idCosto}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +110,7 @@ export default function OrderDetail({ route }) {
         body: JSON.stringify({
           id:idCosto,
           monto: costToSend.monto,
-          descripcion:"Costo" 
+          descripcion:"Costo Adicional Agregado a la orden" 
         }),
       });
   
@@ -151,7 +134,7 @@ export default function OrderDetail({ route }) {
 const handleCancel = async () => {
 
   try {
-    await fetch(`http://192.168.0.106:5101/status/${id}`, {
+    await fetch(`${API_URLS.BASE_URL_ORDER}/status/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -164,9 +147,11 @@ const handleCancel = async () => {
 };
 // Adquirir el id del costo adiciona seleccionado
 const evaluarCosto = (nombreCosto: string): string => {
- if (nombreCosto==="Transporte"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf7"}
- if (nombreCosto==="Mano de Obra"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf8"}
- if (nombreCosto==="Materiales"){return ""}
+ if (nombreCosto==="Peaje"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf7"}
+ if (nombreCosto==="Zona Roja"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf8"}
+ if (nombreCosto==="Maniobras Especiales"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf5"}
+ if (nombreCosto==="Otro"){return "bde722ee-f160-4d8e-88ea-c4eaf738bcf6"}
+
   
 };
   // Estado para mostrar u ocultar la sección de costos adicionales
@@ -207,7 +192,7 @@ const evaluarCosto = (nombreCosto: string): string => {
     console.log(idCosto)
     // Realiza la solicitud DELETE al servidor
     try {
-      const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/api/CostoAdicional/${costToRemove.id}`, {
+      const response = await fetch(`${API_URLS.BASE_URL_ORDER}/api/CostoAdicional/${costToRemove.id}`, {
         method: 'DELETE',
       });
   
@@ -258,9 +243,11 @@ const evaluarCosto = (nombreCosto: string): string => {
               style={styles.picker}
             >
               <Picker.Item label="Seleccione una categoría" value="" />
-              <Picker.Item label="Transporte" value="Transporte" />
-              <Picker.Item label="Mano de Obra" value="Mano de Obra" />
-              <Picker.Item label="Materiales" value="Materiales" />
+              <Picker.Item label="Peaje" value="Peaje" />
+              <Picker.Item label="Maniobras Especiales" value="Maniobras Especiales" />
+              <Picker.Item label="Zona Roja" value="Zona Roja" />
+              <Picker.Item label="Otro" value="Otro" />
+
             </Picker>
 
             {/* Campo de entrada para una categoría personalizada */}

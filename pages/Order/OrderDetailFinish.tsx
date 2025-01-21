@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
-
+import { API_URLS } from '../../config/config';
 export default function OrderDetailFinish({ route, navigation }) {
   const { id } = route.params;
 
@@ -14,7 +14,7 @@ export default function OrderDetailFinish({ route, navigation }) {
     const fetchOrderDetail = async () => {
       try {
         console.log(id);
-        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/Orden/${id}`);//probar
+        const response = await fetch(`${API_URLS.BASE_URL_ORDER}/Orden/${id}`);//probar
         if (!response.ok) {
           throw new Error('Error al obtener los datos de la orden.');
         }

@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import { API_URLS } from '../../config/config';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function OrderCancelled() {
   const [cancelledOrders, setCancelledOrders] = useState([]);
-
+    const { vehiculoId } = useAuth();
+  
   // Llamada a la API para obtener los datos
   useEffect(() => {
     const fetchCancelledOrders = async () => {
       try {
-        const response = await fetch('http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/OrdenCancelada/bde722ee-f160-4d8e-88ea-c4eaf738bcf7'); // Reemplaza con la URL correcta de tu API
+        const response = await fetch(`${API_URLS.BASE_URL_ORDER}/OrdenCancelada/${vehiculoId}`); // Reemplaza con la URL correcta de tu API
         const data = await response.json();
         setCancelledOrders(data); // Guarda los datos en el estado
       } catch (error) {
@@ -24,7 +27,8 @@ export default function OrderCancelled() {
   const renderItem = (item) => (
     <View key={item.id} style={styles.item}>
       <View>
-        <Text style={styles.itemText}>{item.numeroFactura}</Text>
+        <Text style={styles.cardTitle}>N.ORDEN {item.denunciante}</Text>
+        <Text style={styles.itemText}>Denunciante: {item.numeroFactura}</Text>
         <Text style={styles.descriptionText}>Direccion Origen: {item.direccionOrigen}</Text>
         <Text style={styles.descriptionText}>Direccion Destino: {item.direcionDestino}</Text>
         <Text style={styles.itemText}>Status: {item.estatus}</Text>
@@ -34,8 +38,7 @@ export default function OrderCancelled() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <View>
-        <View />
+      <View style={styles.topSection}>
       </View>
       <View style={styles.bottomSection}>
         {cancelledOrders.length > 0 ? (
@@ -76,7 +79,7 @@ const styles = StyleSheet.create({
     marginTop: -300,
   },
   item: {
-    backgroundColor: 'red', 
+    backgroundColor: 'rgba(55, 65, 81, 1)', 
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
@@ -105,5 +108,12 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'center',
     marginTop: 20,
+  },
+  cardTitle: {
+    fontSize: 20,
+    marginBottom: 5,
+    fontWeight: '900',
+    color: 'rgb(169, 188, 219)',
+    marginVertical: 10,
   },
 });

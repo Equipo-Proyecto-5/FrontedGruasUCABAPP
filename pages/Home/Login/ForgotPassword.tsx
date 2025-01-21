@@ -9,7 +9,7 @@ import {
   Alert
 } from 'react-native';
 import logo from '../../../assets/LogoUcab-removebg-preview.png';
-
+import { API_URLS } from '../../../config/config';
 
 function ForgotPassword() {
 
@@ -19,7 +19,7 @@ function ForgotPassword() {
      // Cuerpo de la solicitud
      const requestBody = { email };
      // Solicitud POST
-     const response = await fetch('http://ec2-3-143-211-2.us-east-2.compute.amazonaws.com:5230/api/auth/password-reset', {
+     const response = await fetch(`${API_URLS.BASE_URL_LOGIN}/api/auth/password-reset`, {
        method: 'POST',
        headers: {
          'Content-Type': 'application/json',
@@ -40,17 +40,6 @@ function ForgotPassword() {
    }
  };
   
-
-
-
-
-
-
-
-
-
-
-
 
     return (
         <View style={styles.container}>

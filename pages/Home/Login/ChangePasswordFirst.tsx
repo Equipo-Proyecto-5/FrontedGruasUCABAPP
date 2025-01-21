@@ -2,6 +2,7 @@ import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import React,{ useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useRouter} from 'expo-router';
+import { API_URLS } from '../../../config/config';
 
 import {
   View,
@@ -12,10 +13,7 @@ import {
   Image,
   Alert
 } from 'react-native';
-import { push } from 'expo-router/build/global-state/routing';
 import messaging from '@react-native-firebase/messaging';
-
-
 
 function ChangePasswordFirst() {
     //Set de los inputs 
@@ -32,7 +30,7 @@ function ChangePasswordFirst() {
       }
   
       try {
-        const response = await fetch(`http://ec2-3-143-211-2.us-east-2.compute.amazonaws.com:5230/api/auth/${username}`, {
+        const response = await fetch(`${API_URLS.BASE_URL_LOGIN}/api/auth/${username}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -46,13 +44,12 @@ function ChangePasswordFirst() {
           Alert.alert('Éxito', 'Contraseña cambiada correctamente');
           //Registrar token usuario
           const token = await messaging().getToken();
-          const registerTokenResponse = await fetch(
-          "http:192.168.0.105:83/registrarToken",
+          console.log(token);
+          const registerTokenResponse = await fetch(`${API_URLS.BASE_URL_USER}/registrarToken`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              // Envía el token JWT si es necesario
             },
             body: JSON.stringify({
               username,
@@ -60,7 +57,6 @@ function ChangePasswordFirst() {
             }),
           }
         );
-          router.push('/login');
           
         } else {
           const errorData = await response.json();

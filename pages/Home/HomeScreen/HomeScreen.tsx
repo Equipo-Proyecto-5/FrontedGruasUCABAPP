@@ -2,64 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../../contexts/AuthContext';
+import { API_URLS } from '../../../config/config';
+import { useFocusEffect } from '@react-navigation/native';  // Importa useFocusEffect
 
 const HomeScreen = () => {
   const { vehiculoId } = useAuth();
   const [order, setOrder] = useState(null);
-  const [acceptedOrder, setAcceptedOrder] = useState(null); // Orden aceptada
-  const [inProgressOrder, setInProgressOrder] = useState(null); // Orden en progreso
-  const [inLocatedOrder, setInLocatedOrder] = useState(null); // Orden en progreso
-  const [inFinalizedOrder, setInFinalizedOrder] = useState(null); // Orden en progreso
+  const [acceptedOrder, setAcceptedOrder] = useState(null);
+  const [inProgressOrder, setInProgressOrder] = useState(null);
+  const [inLocatedOrder, setInLocatedOrder] = useState(null);
+  const [inFinalizedOrder, setInFinalizedOrder] = useState(null);
 
   const [loading, setLoading] = useState(true);
-  const [idOrden,setIdOrden]=useState(null);
-  // Fetch order on component mount
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/OrdenVigente/${vehiculoId}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
-        if (data.estatus==="PorAceptar")
-        {
-          setOrder(data);
-          setIdOrden(data.id)
-        } 
-        if (data.estatus==="Aceptado")
-        {
-          setAcceptedOrder(data);
-          setIdOrden(data.id)
-        }
-        if (data.estatus==="Localizado")
-          {
-             setInLocatedOrder(data);
-             setIdOrden(data.id)
-          }  
-        if (data.estatus==="EnProgreso")
-          {
-           setInProgressOrder(data);
-           setIdOrden(data.id)
-          }  
-          if (data.estatus==="Finalizado")
-          {
-            setIdOrden(data.id)
-            setInFinalizedOrder(data)
-          }
-      } catch (error) {
-        console.error('Error fetching order:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [idOrden, setIdOrden] = useState(null);
 
-    fetchOrder();
-  }, []);
+  // Recargar datos cuando la pantalla gana el foco
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchOrder = async () => {
+        setLoading(true); // Comienza la carga
+        try {
+          const response = await fetch(`${API_URLS.BASE_URL_ORDER}/OrdenVigente/${vehiculoId}`);
+          const text = await response.text();
+          const data = JSON.parse(text);
+
+          if (data.estatus === "PorAceptar") {
+            setOrder(data);
+            setIdOrden(data.id);
+          } else if (data.estatus === "Aceptado") {
+            setAcceptedOrder(data);
+            setIdOrden(data.id);
+          } else if (data.estatus === "Localizado") {
+            setInLocatedOrder(data);
+            setIdOrden(data.id);
+          } else if (data.estatus === "EnProgreso") {
+            setInProgressOrder(data);
+            setIdOrden(data.id);
+          } else if (data.estatus === "Finalizado") {
+            setInFinalizedOrder(data);
+            setIdOrden(data.id);
+          }
+        } catch (error) {
+          console.error('Error fetching order:', error);
+        } finally {
+          setLoading(false); // Finaliza la carga
+        }
+      };
+
+      fetchOrder();
+    }, [vehiculoId]) // Dependencia para que se ejecute cuando vehiculoId cambie
+  );
 
   const handleAccept = async () => {
     if (!order) return;
 
     try {
-      await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/status/${order.id}`, {
+      await fetch(`${API_URLS.BASE_URL_ORDER}/status/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +76,7 @@ const HomeScreen = () => {
     if (!order) return;
 
     try {
-      await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/status/${order.id}`, {
+      await fetch(`${API_URLS.BASE_URL_ORDER}/status/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +93,7 @@ const HomeScreen = () => {
   const handleLocalize = async () => {
 
     try {
-      await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/status/${idOrden}`, {
+      await fetch(`${API_URLS.BASE_URL_ORDER}/status/${idOrden}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

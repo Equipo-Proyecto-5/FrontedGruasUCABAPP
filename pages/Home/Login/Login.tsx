@@ -12,6 +12,7 @@ import logo from '../../../assets/LogoUcab-removebg-preview.png';
 import { Link } from 'expo-router';
 import { useRouter} from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
+import { API_URLS } from '../../../config/config';
 
 
 function Login () {
@@ -24,7 +25,7 @@ function Login () {
   const handleLogin = async () => {
     try {
       const requestBody = { userName, password };
-      const response = await fetch('http://ec2-3-143-211-2.us-east-2.compute.amazonaws.com:5230/api/auth/login', {
+      const response = await fetch(`${API_URLS.BASE_URL_LOGIN}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ function Login () {
       if (response.ok) {
         const data = await response.json();
         if (data.role==="Conductor"){
-        const responseAdicional = await fetch(`http://ec2-18-219-26-230.us-east-2.compute.amazonaws.com:5163/api/Usuario/Conductor/${userName}`);  // Reemplaza con la URL de tu API
+        const responseAdicional = await fetch(`${API_URLS.BASE_URL_USER}/api/Usuario/Conductor/${userName}`);  // Reemplaza con la URL de tu API
         const dataAdicional = await responseAdicional.json();
       //Setear Contexto y redirigir a la pag principal
         setUserId(dataAdicional.id);
@@ -54,7 +55,6 @@ function Login () {
       } else {
         console.log("error")
         
-      Alert.alert('Error', 'Credenciales invalidas');
       }
     } catch (error) {
       console.error(error);
