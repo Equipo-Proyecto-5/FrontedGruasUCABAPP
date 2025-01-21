@@ -1,33 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFocusEffect } from '@react-navigation/native';
+import { API_URLS } from '../../config/config';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Order({ navigation }) {
   const { vehiculoId } = useAuth();
   const [activeTab, setActiveTab] = useState('Activas');
-  const [orders, setOrders] = useState([]);  // Estado para almacenar las órdenes
-  const [loading, setLoading] = useState(true);  // Estado para controlar el loading
-
-  
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Llamada a la API para obtener las órdenes
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await fetch(`http://ec2-3-145-25-111.us-east-2.compute.amazonaws.com:5101/OrdenesResumen/${vehiculoId}`);  // Reemplaza con la URL de tu API
-        const data = await response.json();
-        setOrders(data);  
-      } catch (error) {
-        console.error('Error al obtener las órdenes:', error);
-      } finally {
-        setLoading(false);  
-      }
-    };
+  const fetchOrders = async () => {
+    setLoading(true); // Mostrar el loading cada vez que se recargue
+    try {
+      const response = await fetch(`${API_URLS.BASE_URL_ORDER}/OrdenesResumen/${vehiculoId}`);
+      const data = await response.json();
+      setOrders(data);
+    } catch (error) {
+      console.error('Error al obtener las órdenes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchOrders();
-  }, []);  
+  // Ejecutar fetchOrders cada vez que la pantalla gane el foco
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrders();
+    }, []) // La dependencia vacía asegura que solo se cree una vez el callback
+  );
+
   const sortedData = orders.sort((a, b) => {
     if (a.estatus === 'EnProceso') return -1;
     if (b.estatus === 'EnProceso') return 1;
@@ -35,20 +40,31 @@ export default function Order({ navigation }) {
   });
 
   const renderItem = (item) => (
-    <TouchableOpacity key={item.id} style={[styles.item, item.estatus === 'EnProceso' && styles.enProcesoItem]}
+    <TouchableOpacity
+      key={item.id}
+      style={[styles.item, item.estatus === 'EnProceso' && styles.enProcesoItem]}
       onPress={() => {
-        if (item.estatus === 'Finalizado' || item.estatus==='Pagado') {
+        if (item.estatus === 'Finalizado' || item.estatus === 'Pagado') {
           navigation.navigate('OrderDetailFinish', { id: item.id });
-        } else if (item.estatus==='Aceptado'||item.estatus==='Localizado'|| item.estatus==='EnProceso') {
+        } else if (item.estatus === 'Aceptado' || item.estatus === 'Localizado' || item.estatus === 'EnProceso') {
           navigation.navigate('OrderDetail', { id: item.id });
         }
-      }} >
+      }}
+    >
       <View>
-         <Text style={styles.cardTitle}>N.ORDEN  {item.numeroFactura}</Text>
-        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoTextTitle]}>Denunciante: {item.denunciante}</Text>
-        <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Direccion Origen: {item.direccionOrigen}</Text>
-        <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>Direccion Destino: {item.direccionDestino}</Text>
-        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoTextTitle]}>Estatus: {item.estatus}</Text>
+        <Text style={styles.cardTitle}>N.ORDEN {item.numeroFactura}</Text>
+        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoTextTitle]}>
+          Denunciante: {item.denunciante}
+        </Text>
+        <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>
+          Direccion Origen: {item.direccionOrigen}
+        </Text>
+        <Text style={[styles.descriptionText, item.estatus === 'EnProceso' && styles.enProcesoText]}>
+          Direccion Destino: {item.direccionDestino}
+        </Text>
+        <Text style={[styles.itemText, item.estatus === 'EnProceso' && styles.enProcesoTextTitle]}>
+          Estatus: {item.estatus}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -60,11 +76,9 @@ export default function Order({ navigation }) {
       </View>
       <View style={styles.bottomSection}>
         {loading ? (
-          <Text style={styles.placeholderText}>Cargando órdenes...</Text>  // Mensaje mientras carga
+          <Text style={styles.placeholderText}>Cargando órdenes...</Text>
         ) : activeTab === 'Activas' && orders.length > 0 ? (
-          <View>
-            {sortedData.map(renderItem)}
-          </View>
+          <View>{sortedData.map(renderItem)}</View>
         ) : (
           <Text style={styles.placeholderText}>No hay órdenes realizadas</Text>
         )}
